@@ -45,7 +45,7 @@
         "babel-jest": "^28.1.2",
         "babel-loader": "8.2.5",
         "chalk": "^4.1.0",
-        "cssnano": "4.1.11",
+        "cssnano": "5.1.14",
         "dotenv": "^16.0.2",
         "eslint": "^8.19.0",
         "eslint-plugin-babel": "^5.3.1",
