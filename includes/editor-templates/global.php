@@ -62,6 +62,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				#>
 			</div>
 		</div>
+		<div>
+		<textarea id="e-paste-area" cols="30" rows="10" placeholder="Paste here elementor data..."></textarea>
+		</div>
 	</div>
 </script>
 

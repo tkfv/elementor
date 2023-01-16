@@ -39,6 +39,7 @@ import ContainerHelper from 'elementor-editor-utils/container-helper';
 			'click @ui.closeButton': 'onCloseButtonClick',
 			'click @ui.presets': 'onPresetSelected',
 			'click @ui.containerPresets': 'onContainerPresetSelected',
+			'paste #e-paste-area': 'onPasteAreaPaste',
 		};
 	}
 
@@ -89,6 +90,24 @@ import ContainerHelper from 'elementor-editor-utils/container-helper';
 						title: __( 'Paste', 'elementor' ),
 						isEnabled: () => $e.components.get( 'document/elements' ).utils.isPasteEnabled( elementor.getPreviewContainer() ),
 						callback: () => $e.run( 'document/ui/paste', {
+							container: elementor.getPreviewContainer(),
+							options: {
+								at: this.getOption( 'at' ),
+								rebuild: true,
+							},
+							onAfter: () => this.onAfterPaste(),
+						} ),
+					},
+				],
+			}, {
+				name: 'paste_from_clipboard',
+				actions: [
+					{
+						name: 'paste_from_clipboard',
+						title: __( 'Paste From Clipboard', 'elementor' ),
+						isEnabled: () => true,
+						callback: () => $e.run( 'document/ui/paste', {
+							storageType: 'clipboard',
 							container: elementor.getPreviewContainer(),
 							options: {
 								at: this.getOption( 'at' ),
@@ -183,6 +202,23 @@ import ContainerHelper from 'elementor-editor-utils/container-helper';
 			elementor.getPreviewContainer(),
 			this.options,
 		);
+	}
+
+	onPasteAreaPaste( event ) {
+		setTimeout( () => {
+			$e.run( 'document/ui/paste', {
+				container: elementor.getPreviewContainer(),
+				storageType: 'textarea',
+				data: this.$( event.currentTarget ).val(),
+				options: {
+					at: this.getOption( 'at' ),
+					rebuild: true,
+				},
+				onAfter: () => this.onAfterPaste(),
+			} );
+
+			this.$( event.currentTarget ).val( '' );
+		}, 50 );
 	}
 
 	onDropping() {

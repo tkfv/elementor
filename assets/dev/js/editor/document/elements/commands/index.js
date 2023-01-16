@@ -19,3 +19,5 @@ export { Select } from './select';
 export { SelectAll } from './select-all';
 export { Settings } from './settings';
 export { ToggleSelection } from './toggle-selection';
+
+export { PasteFromClipboard } from './paste-from-clipboard';

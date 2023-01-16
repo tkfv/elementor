@@ -1,12 +1,28 @@
 export class Paste extends $e.modules.CommandBase {
-	initialize( args ) {
+	async getPasteData( { storageType = 'localstorage', data } ) {
+		if ( 'localstorage' === storageType ) {
+			return elementorCommon.storage.get( 'clipboard' ) || [];
+		}
+
+		if ( 'textarea' === storageType ) {
+			return JSON.parse( data );
+		}
+
+		// Extract the data with the clipboard api
+		const clipboardData = await navigator.clipboard.readText();
+
+		return JSON.parse( clipboardData ) || {};
+	}
+
+	async apply( args ) {
 		const { containers = [ args.container ] } = args;
 
-		super.initialize( args );
+		this.storage = await this.getPasteData( args );
+		if ( ! this.storage || ! this.storage?.elements?.length && 'elementor' !== this.storage?.type ) {
+			return false;
+		}
 
-		this.storage = elementorCommon.storage.get( 'clipboard' ) || [];
-
-		this.storage = this.storage.map( ( model ) =>
+		this.storage.elements = this.storage.elements.map( ( model ) =>
 			new Backbone.Model( model ),
 		);
 
@@ -16,10 +32,8 @@ export class Paste extends $e.modules.CommandBase {
 		} else {
 			this.target = containers;
 		}
-	}
 
-	apply( args ) {
-		if ( ! this.target || 0 === this.storage.length ) {
+		if ( ! this.target || 0 === this.storage.elements.length ) {
 			return false;
 		}
 
@@ -27,7 +41,7 @@ export class Paste extends $e.modules.CommandBase {
 
 		this.target.forEach( ( /* Container */ container ) => {
 			const { options = {} } = args,
-				pasteOptions = $e.components.get( 'document/elements' ).utils.getPasteOptions( this.storage[ 0 ], container );
+				pasteOptions = $e.components.get( 'document/elements' ).utils.getPasteOptions( this.storage.elements[ 0 ], container );
 
 			if ( ! pasteOptions.isValidChild ) {
 				if ( pasteOptions.isSameElement ) {
@@ -49,6 +63,12 @@ export class Paste extends $e.modules.CommandBase {
 
 				if ( undefined !== options.at ) {
 					commandArgs.at = options.at;
+				}
+
+				commandArgs.storageType = args.storageType || 'localstorage';
+
+				if ( undefined !== args.data ) {
+					commandArgs.data = args.data;
 				}
 
 				result.push( $e.run( 'document/elements/paste', commandArgs ) );
